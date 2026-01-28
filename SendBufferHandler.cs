@@ -15,14 +15,14 @@ internal static class SendBufferHandler
         if (segment == null)
         {
             CurrentBuffer.Value = new();
-            segment = CurrentBuffer.Value.Open(reserveSize);
+            segment = CurrentBuffer.Value.Open(reserveSize);    
         }
 
-        return segment.Value;
+        return segment!.Value;
     }
 
-    public static ArraySegment<byte>? Close(int usedSize)
+    public static ArraySegment<byte> Close(int usedSize)
     {
-        return CurrentBuffer.Value.Close(usedSize);
+        return CurrentBuffer.Value!.Close(usedSize)!.Value;
     }
 }
