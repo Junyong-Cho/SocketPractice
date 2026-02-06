@@ -44,6 +44,7 @@ partial class Session
         {
             Console.WriteLine("RegisterSend Failed");
             Console.WriteLine(e);
+            Disconnect();
         }
     }
 

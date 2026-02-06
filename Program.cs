@@ -9,8 +9,6 @@ server.Bind(new IPEndPoint(IPAddress.Parse(serverIp), port));
 
 server.Listen(100);
 
-Console.WriteLine($"서버가 {server.LocalEndPoint?.ToString()}에서 시작되었습니다.");
-
 ClientListener listener = new(server);
 
 while (true)

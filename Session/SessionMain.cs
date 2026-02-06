@@ -4,7 +4,7 @@ using System.Net.Sockets;
 abstract partial class Session
 {
     object _lock = new();
-    int _disconnected = 0;
+    volatile int _disconnected = 0;
 
     Socket? _socket;
 
@@ -24,6 +24,22 @@ abstract partial class Session
     public void Start(Socket socket)
     {
         _socket = socket;
+        try
+        {
+            if (_socket.RemoteEndPoint == null)
+            {
+                Disconnect();
+                return;
+            }
+
+            OnConnected(_socket.RemoteEndPoint);
+        }
+        catch(Exception e)
+        {
+            Console.WriteLine("Session Start Failed");
+            Console.WriteLine(e);
+            Disconnect();
+        }
 
         _sendArgs.Completed += OnSendComplete;
         _recvArgs.Completed += OnRecvComplete;
@@ -36,8 +52,11 @@ abstract partial class Session
         if (Interlocked.Exchange(ref _disconnected, 1) == 1)
             return;
 
+        if (_socket != null && _socket!.RemoteEndPoint != null)
+            OnDisconnected(_socket.RemoteEndPoint);
+
         _socket!.Shutdown(SocketShutdown.Both);
-        _socket = null;
+        _socket.Close();
 
         lock (_lock)
         {

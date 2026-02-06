@@ -4,6 +4,9 @@ partial class Session
 {
     void RegisterRecv()
     {
+        if (_recvBuffer.FreeSize < 1024)
+            _recvBuffer.Clean();
+
         var segment = _recvBuffer.WriteSegment;
 
         _recvArgs.SetBuffer(segment.Array, segment.Offset, segment.Count);
@@ -17,19 +20,16 @@ partial class Session
         }
         catch(Exception e)
         {
-            Console.WriteLine("RegisterSend Failed");
+            Console.WriteLine("RegisterRecv Failed");
             Console.WriteLine(e);
+            Disconnect();
         }
     }
 
     void OnRecvComplete(object? sender, SocketAsyncEventArgs recvArgs)
     {
-
-        lock (_lock)
-        {
-            if (_disconnected == 1)
-                return;
-        }
+        if (_disconnected == 1)
+            return;
 
         int byteCount = recvArgs.BytesTransferred;
 
@@ -41,7 +41,7 @@ partial class Session
 
         int processCount = OnRecv(_recvBuffer.ReadSegment);
 
-        if (processCount == 0 || _recvBuffer.OnRead(processCount) == false)
+        if (processCount < 0 || _recvBuffer.OnRead(processCount) == false)
         {
             Disconnect();
             return;
