@@ -3,7 +3,6 @@
 ## Program.cs
 
 - 메인 파일
-- 미구현
 
 ## ClientListener.cs
 
@@ -52,3 +51,12 @@
 - ThreadLocal&lt;SendBuffer&gt;로 쓰레드마다 독립적인 SendBuffer 작업공간 가짐
 - Open과 Close로 SendBuffer의 ArraySegment 전달 역할
 - null을 return받으면 SendBuffer 인스턴스 새로 생성
+
+# Gemini 피드백 내용
+
+- RecvBuffer에서 내어주는 WriteSegment 프로퍼티에서 세그먼트를 내어주기 전 남은 버퍼 크기를 계산하여 세그먼트를 청소하는 로직을 구현하였는데 프로퍼티는 가벼운 작업을 하는 것이 C# 개발자들의 약속이며 low level의 서버에서는 개발자가 명시적으로 청소를 하도록 하는 것이 이상적이라고 했다.
+
+- Socket은 늘 불안정하기에 Session에서 소켓을 사용하는 코드는 전부 try catch문으로 감싸주고 catch문에 도달했다는 것은 소켓에 이상이 생겼다는 점으로 반드시 Disconnect를 호출하여 세션을 종료하도록 한다.
+- Disconnect에 socket.Close()를 깜빡했다.
+
+- _disconnect 변수를 검사하는 과정을 lock으로 감싸주어 검사중에 _disconnect가 변경되는 것을 대비했는데 이는 검사 효율 대비 비용이 큰 코드로 _disconnect 변수를 volatile로 선언하여 변수를 캐싱하지 않고 매번 메모리를 직접 참조하여 변경을 감지하도록 하였다.
