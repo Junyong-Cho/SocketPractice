@@ -9,7 +9,16 @@
     int _freeSize => _buffer.Length - _writePos;
 
     public ArraySegment<byte> ReadSegment => new(_buffer, _readPos, _dataSize);
-    public ArraySegment<byte> WriteSegment => new(_buffer, _writePos, _freeSize);
+    public ArraySegment<byte> WriteSegment
+    {
+        get
+        {
+            if (_freeSize < 1 << 10)
+                Clean();
+
+            return new(_buffer, _writePos, _freeSize);
+        }
+    }
 
     public RecvBuffer(int bufferSize = 1 << 16)
     {
@@ -33,7 +42,7 @@
         return true;
     }
 
-    public void Clean()
+    void Clean()
     {
         int dataSize = _dataSize;
 

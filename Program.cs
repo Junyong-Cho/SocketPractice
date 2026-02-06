@@ -11,20 +11,15 @@ server.Listen(100);
 
 Console.WriteLine($"서버가 {server.LocalEndPoint?.ToString()}에서 시작되었습니다.");
 
+ClientListener listener = new(server);
+
 while (true)
 {
-    var client = await server.AcceptAsync();
+    string ord = Console.ReadLine()!;
 
-    if(client.RemoteEndPoint is IPEndPoint)
+    if (ord == "exit")
     {
-        Console.WriteLine($"Client Accpeted at {client.RemoteEndPoint.ToString()}");
+        Console.WriteLine("서버를 종료합니다.");
+        return;
     }
-
-    _ = HandleClient(client);
 }
-
-async Task HandleClient(Socket client)
-{
-    await Task.Delay(1000);
-}
-

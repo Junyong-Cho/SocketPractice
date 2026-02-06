@@ -5,6 +5,12 @@
 - 메인 파일
 - 미구현
 
+## ClientListener.cs
+
+- 클라이언트 소켓 처리 클래스
+- SAEA로 구현
+- Start와 OnAcceptComplete 구현
+
 ## RecvBuffer
 
 - 패킷 버퍼
@@ -12,23 +18,29 @@
 - 데이터 크기, 여유 공간 크기
 - 읽기용 쓰기용 세그먼트 반환
 - 읽고 쓴 후 각 포인터 옮기기
-- 버퍼가 꽉 차면 포인터 앞으로 옮기기
-- IDisposable 구현
+- 버퍼가 일정 부분 차면 포인터 앞으로 옮기기
 
 ## Session.cs
 
-- 패킷 처리 쓰레드?
-- Socket, RecvBuffer, Queue, List
-- object, bool
-- 소켓을 통해 비트 받고 패킷 덩어리 한번에 처리하면서 루프
-- 패킷을 전송하는 로직 구현
-- 스레드 동기화 구현
+- 메인 소켓 처리 추상 클래스
+- Send 코드(SendSession), Recv 코드(RecvSession), 필드 추상 메서드 등 구현 파일(SessionMain)로 구분해 관리
+- SessionMain
+    - 잠금 오브젝트
+    - 연결 상태 여부 변수
+    - 소켓
+    - RecvBuffer
+    - 임시 큐, 전송 리스트
+    - send, recv SAEA
+    - 연결, 연결 종료, Send 성공 시, Recv 성공 시 동작할 추상 메서드 정의
+    - 세션 시작 메서드
+- SendSession
+    - Send 메서드(큐에 저장)
+    - Send 등록 메서드(전송 시작)
+    - Send 성공시 동작할 메서드
+- RecvSession
+    - Recv 등록 메서드 - 시작시 바로 동작
+    - Recv 성공시 동작할 메서드
 
-## PacketHeader.cs
-
-- 패킷 상태 정의 구조체
-- 패킷 사이즈, Id
-- 구조체 자체 사이즈 반환
 
 ## SendBuffer.cs
 
@@ -37,6 +49,6 @@
 
 ## SendBufferHandler
 
-- ThreadLocal&lt;SendBuffer&gt;를 가지며 쓰레드마다 독립적인 SendBuffer 작업공간 가짐
+- ThreadLocal&lt;SendBuffer&gt;로 쓰레드마다 독립적인 SendBuffer 작업공간 가짐
 - Open과 Close로 SendBuffer의 ArraySegment 전달 역할
 - null을 return받으면 SendBuffer 인스턴스 새로 생성

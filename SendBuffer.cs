@@ -2,7 +2,7 @@
 
 internal class SendBuffer
 {
-    byte[]? _buffer;
+    byte[] _buffer;
     int _usedSize = 0;
 
     public int FreeSize => _buffer!.Length - _usedSize;
