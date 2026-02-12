@@ -1,27 +1,32 @@
-﻿using System.Net.Sockets;
+﻿using System.Net;
+using System.Net.Sockets;
 
 internal class ClientListener
 {
-    Socket _socket;
+    Socket _listenSocket;
     SocketAsyncEventArgs _acceptArgs;
 
     Func<Session> _sessionFactory;
 
-    public ClientListener(Socket socket)
+    public void Init(EndPoint endPoint, Func<Session> sessionFactory)
     {
-        _socket = socket;
-        _acceptArgs = new();
+        _listenSocket = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
+        _sessionFactory = sessionFactory;
+
+        _listenSocket.Bind(endPoint);
+        _listenSocket.Listen(10);
 
         _acceptArgs.Completed += OnAcceptCompleted;
 
-        RegisterAccept();
+        
     }
 
     void RegisterAccept()
     {
         try
         {
-            bool accept = _socket.AcceptAsync(_acceptArgs);
+            bool accept = _listenSocket.AcceptAsync(_acceptArgs);
 
             if (accept == false)
             {

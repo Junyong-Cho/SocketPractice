@@ -8,11 +8,6 @@ internal class GameSession : Session
     {
         Console.WriteLine($"Connected: {endPoint.ToString()}");
 
-        byte[] sendBuff = ArrayPool<byte>.Shared.Rent(1 << 16);
-
-        int len = Encoding.UTF8.GetBytes("Hello world", sendBuff);
-
-        Send(new ArraySegment<byte>(sendBuff, 0, len));
     }
 
     protected override void OnDisconnected(EndPoint endPoint)

@@ -1,15 +1,12 @@
 ﻿using System.Net;
-using System.Net.Sockets;
+using System.Net.Http.Headers;
 
 string serverIp = "127.0.0.1";
 int port = 8080;
 
-Socket server = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-server.Bind(new IPEndPoint(IPAddress.Parse(serverIp), port));
+ClientListener listener = new();
 
-server.Listen(100);
-
-ClientListener listener = new(server);
+listener.Init(new IPEndPoint(IPAddress.Parse(serverIp), port), () => new GameSession());
 
 while (true)
 {
