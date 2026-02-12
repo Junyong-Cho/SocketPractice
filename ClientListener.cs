@@ -5,6 +5,8 @@ internal class ClientListener
     Socket _socket;
     SocketAsyncEventArgs _acceptArgs;
 
+    Func<Session> _sessionFactory;
+
     public ClientListener(Socket socket)
     {
         _socket = socket;
@@ -12,10 +14,10 @@ internal class ClientListener
 
         _acceptArgs.Completed += OnAcceptCompleted;
 
-        Start();
+        RegisterAccept();
     }
 
-    void Start()
+    void RegisterAccept()
     {
         try
         {
@@ -45,6 +47,6 @@ internal class ClientListener
 
 
 
-        Start();
+        RegisterAccept();
     }
 }

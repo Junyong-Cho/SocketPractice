@@ -1,6 +1,4 @@
-﻿namespace StudyProject;
-
-internal static class SendBufferHandler
+﻿internal static class SendBufferHandler
 {
 
     static ThreadLocal<SendBuffer> CurrentBuffer = new();

@@ -1,6 +1,4 @@
-﻿namespace StudyProject;
-
-internal class SendBuffer
+﻿internal class SendBuffer
 {
     byte[] _buffer;
     int _usedSize = 0;
