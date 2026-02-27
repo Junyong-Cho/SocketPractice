@@ -30,7 +30,7 @@ internal class ServerSession : Session
     {
         string msg = Encoding.UTF8.GetString(segment);
 
-        Console.WriteLine($"[From {_socket!.RemoteEndPoint} : {msg}");
+        Console.WriteLine($"[From {_socket!.RemoteEndPoint}] : {msg}");
 
         var sendSegment = SendBufferHandler.Open(segment.Count);
 
@@ -45,6 +45,6 @@ internal class ServerSession : Session
 
     protected override void OnSend(int numOfBytes)
     {
-        Console.WriteLine($"To {_socket!.RemoteEndPoint} {numOfBytes} Sended");
+        Console.WriteLine($"To {_socket!.RemoteEndPoint}] {numOfBytes} Sended");
     }
 }
