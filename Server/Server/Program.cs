@@ -10,11 +10,13 @@ IPEndPoint endPoint = new(ip, port);
 
 ClientListener listener = new(endPoint);
 
-listener.Start();
+listener.Start(listenCount: 2001);
 
 string? ord;
 
 Console.WriteLine($"Server Open {endPoint}");
+
+//Console.SetOut(TextWriter.Null); // 스트레스 테스트시 출력 방지
 
 while (true)
 {

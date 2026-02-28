@@ -6,7 +6,6 @@ namespace Server;
 
 internal class ServerSession : Session
 {
-
     protected override void OnConnect()
     {
         Console.WriteLine($"Connected User : {_socket!.RemoteEndPoint}");
@@ -22,7 +21,6 @@ internal class ServerSession : Session
 
     protected override void OnDisconnect()
     {
-        Console.WriteLine($"Disconnected User : {_socket!.RemoteEndPoint}");
         SessionPool<ServerSession>.Return(this);
     }
 
@@ -45,6 +43,6 @@ internal class ServerSession : Session
 
     protected override void OnSend(int numOfBytes)
     {
-        Console.WriteLine($"To {_socket!.RemoteEndPoint}] {numOfBytes} Sended");
+        //Console.WriteLine($"To {_socket!.RemoteEndPoint}] {numOfBytes} Sended");
     }
 }
