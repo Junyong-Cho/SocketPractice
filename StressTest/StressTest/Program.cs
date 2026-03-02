@@ -11,6 +11,8 @@ var endPoint = new IPEndPoint(ip, port);
 
 SessionHandler._endPoint = endPoint;
 
+Console.SetOut(TextWriter.Null);    // 출력 방지
+
 CountReference.watch = Stopwatch.StartNew();
 SessionHandler.Start();
 

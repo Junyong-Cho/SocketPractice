@@ -22,10 +22,12 @@ static class SessionHandler
             if (Interlocked.Exchange(ref CountReference.success, true) == true)
                 return;
             CountReference.watch!.Stop();
-            Console.WriteLine($"Time: {CountReference.watch.ElapsedMilliseconds}");
-            Console.WriteLine($"ConnectFailCount : {CountReference.connectFailCount}");
-            Console.WriteLine($"SocketErrorCount : {CountReference.socketErrorCount}");
-            Console.WriteLine("Complete");
+            StreamWriter writer = new(Console.OpenStandardOutput());
+            writer.WriteLine($"Time: {CountReference.watch.ElapsedMilliseconds}");
+            writer.WriteLine($"ConnectFailCount : {CountReference.connectFailCount}");
+            writer.WriteLine($"SocketErrorCount : {CountReference.socketErrorCount}");
+            writer.WriteLine("Complete");
+            writer.Flush();
         }
 
         Socket socket = new(_endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
