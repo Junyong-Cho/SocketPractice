@@ -5,8 +5,8 @@ namespace ServerCore.Sessions;
 
 public abstract partial class Session 
 {
-    volatile int _disconnected = 0;
-    volatile int _refCount = 1;
+    protected volatile int _disconnected = 0;
+    protected volatile int _refCount = 1;
 
     public int Disconnected => _disconnected;
 
@@ -78,21 +78,7 @@ public abstract partial class Session
     protected virtual void Release()
     {
         if (Interlocked.Decrement(ref _refCount) == 0)
-        {
             OnDisconnect();
-            return;
-        }
-    }
-
-    protected virtual void Release(Action RegisterCall)
-    {
-        if (Interlocked.Decrement(ref _refCount) == 0)
-        {
-            OnDisconnect();
-            return;
-        }
-
-        RegisterCall();
     }
 
     public virtual void Reset()

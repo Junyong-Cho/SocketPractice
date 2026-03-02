@@ -81,17 +81,24 @@ partial class Session
         _pendingList.Clear();
         _sendArgs.BufferList = null;
 
-        lock (_lock)
+        try
         {
-            if (_sendingList.Count == 0)
+            lock (_lock)
             {
-                _isSending = false;
-                return;
+                if (_sendingList.Count == 0)
+                {
+                    _isSending = false;
+                    return;
+                }
+
+                (_sendingList, _pendingList) = (_pendingList, _sendingList);
             }
 
-            (_sendingList, _pendingList) = (_pendingList, _sendingList);
+            RegisterSend();
         }
-
-        Release(RegisterSend);
+        finally
+        {
+            Release();
+        }
     }
 }

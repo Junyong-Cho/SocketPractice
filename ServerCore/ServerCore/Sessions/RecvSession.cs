@@ -68,6 +68,8 @@ partial class Session
             return;
         }
 
-        Release(RegisterRecv);
+        RegisterRecv();
+
+        Release();
     }
 }
