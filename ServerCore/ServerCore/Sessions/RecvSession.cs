@@ -6,29 +6,37 @@ partial class Session
 {
     protected virtual void RegisterRecv()
     {
-        if (_disconnected == 1)
-            return;
-
         Interlocked.Increment(ref _refCount);
 
-        if (_recvBuffer.FreeSize < 1024)
-            _recvBuffer.Clean();
-
-        var segment = _recvBuffer.WriteSegment;
-
-        _recvArgs.SetBuffer(segment.Array, segment.Offset, segment.Count);
-
-        try
+        while (true)
         {
-            bool pending = _socket!.ReceiveAsync(_recvArgs);
+            if (_disconnected == 1)
+            {
+                Release();
+                return;
+            }
 
-            if (pending == false)
-                OnRecvComplete(_socket, _recvArgs);
-        }
-        catch(Exception e)
-        {
-            LogExceptionAndDisconnect(e);
-            return;
+            if (_recvBuffer.FreeSize < 1024)
+                _recvBuffer.Clean();
+
+            var segment = _recvBuffer.WriteSegment;
+
+            _recvArgs.SetBuffer(segment.Array, segment.Offset, segment.Count);
+
+            try
+            {
+                bool pending = _socket!.ReceiveAsync(_recvArgs);
+
+                if (pending == true)
+                    return;
+
+                OnRecvComplete(null, _recvArgs);
+            }
+            catch(Exception e)
+            {
+                LogExceptionAndDisconnectAndRelease(e);
+                return;
+            }
         }
     }
 
@@ -36,7 +44,7 @@ partial class Session
     {
         if (recvArgs.SocketError != SocketError.Success)
         {
-            LogExceptionAndDisconnect(recvArgs.SocketError);
+            LogExceptionAndDisconnectAndRelease(recvArgs.SocketError);
             return;
         }
 
@@ -44,13 +52,13 @@ partial class Session
 
         if (byteTransferred <= 0)
         {
-            LogExceptionAndDisconnect("ZeroByte Transferred");
+            LogExceptionAndDisconnectAndRelease("ZeroByte Transferred");
             return;
         }
 
         if (_recvBuffer.OnWrite(byteTransferred) == false)
         {
-            LogExceptionAndDisconnect("UnExpected Error on RecvBuffer Writing");
+            LogExceptionAndDisconnectAndRelease("UnExpected Error on RecvBuffer Writing");
             return;
         }
 
@@ -58,15 +66,18 @@ partial class Session
 
         if (len < 0)
         {
-            LogExceptionAndDisconnect($"RecvSession Packet Processing Error");
+            LogExceptionAndDisconnectAndRelease($"RecvSession Packet Processing Error");
             return;
         }
 
         if (_recvBuffer.OnRead(len) == false)
         {
-            LogExceptionAndDisconnect("UnExpected Error on RecvBuffer Reading");
+            LogExceptionAndDisconnectAndRelease("UnExpected Error on RecvBuffer Reading");
             return;
         }
+
+        if (sender == null)
+            return;
 
         RegisterRecv();
 

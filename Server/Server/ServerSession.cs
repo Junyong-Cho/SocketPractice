@@ -9,7 +9,7 @@ internal class ServerSession : Session
 {
     static ServerSession?[] globalSession = new ServerSession[10000]; // 동접자 1만
     static ConcurrentStack<int> sessionIdxManager = new(Enumerable.Range(0, 10000));
-
+    
     int sessionIdx;
 
     protected override void OnConnect()

@@ -40,23 +40,42 @@ partial class Session
 
     protected virtual void RegisterSend()
     {
-        if (_disconnected == 1)
-            return;
-
         Interlocked.Increment(ref _refCount);
 
-        _sendArgs.BufferList = _pendingList;
-
-        try
+        while (true)
         {
-            bool pending = _socket!.SendAsync(_sendArgs);
+            if (_disconnected == 1)
+            {
+                Release();
+                return;
+            }
 
-            if (pending == false)
-                OnSendComplete(_socket, _sendArgs);
-        }
-        catch(Exception e)
-        {
-            LogExceptionAndDisconnect(e);
+            _sendArgs.BufferList = _pendingList;
+
+            try
+            {
+                bool pending = _socket!.SendAsync(_sendArgs);
+
+                if (pending == true)
+                    return;
+
+                OnSendComplete(null, _sendArgs);
+
+                if (_pendingList.Count == 0)
+                {
+                    lock (_lock)
+                    {
+                        _isSending = false;
+                    }
+                    Release();
+                    return;
+                }
+            }
+            catch(Exception e)
+            {
+                LogExceptionAndDisconnectAndRelease(e);
+                return;
+            }
         }
     }
 
@@ -64,7 +83,7 @@ partial class Session
     {
         if (sendArgs.SocketError != SocketError.Success)
         {
-            LogExceptionAndDisconnect(sendArgs.SocketError);
+            LogExceptionAndDisconnectAndRelease(sendArgs.SocketError);
             return;
         }
 
@@ -72,7 +91,7 @@ partial class Session
 
         if (byteTransferred <= 0)
         {
-            LogExceptionAndDisconnect($"Zero Byte Sended");
+            LogExceptionAndDisconnectAndRelease($"Zero Byte Sended");
             return;
         }
 
@@ -81,24 +100,22 @@ partial class Session
         _pendingList.Clear();
         _sendArgs.BufferList = null;
 
-        try
-        {
-            lock (_lock)
-            {
-                if (_sendingList.Count == 0)
-                {
-                    _isSending = false;
-                    return;
-                }
+        bool continueSend = true;
 
+        lock (_lock)
+        {
+            if (_sendingList.Count == 0)
+                continueSend = false;
+            else
                 (_sendingList, _pendingList) = (_pendingList, _sendingList);
-            }
+        }
 
+        if (sender == null)
+            return;
+
+        if (continueSend == true)
             RegisterSend();
-        }
-        finally
-        {
-            Release();
-        }
+
+        Release();
     }
 }

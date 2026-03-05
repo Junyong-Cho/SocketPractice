@@ -68,7 +68,7 @@ public abstract partial class Session
         Release();
     }
 
-    protected virtual void LogExceptionAndDisconnect(object log)
+    protected virtual void LogExceptionAndDisconnectAndRelease(object log)
     {
         Console.WriteLine(log);
         Disconnect();

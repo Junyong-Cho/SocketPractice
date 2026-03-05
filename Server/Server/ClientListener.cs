@@ -22,6 +22,8 @@ internal class ClientListener
     {
         _listener.Listen(listenCount);
 
+        _argsCount = argsCount;
+
         while (argsCount-- > 0)
         {
             SocketAsyncEventArgs accpArgs = new();
@@ -36,35 +38,40 @@ internal class ClientListener
 
     void RegisterAccp(SocketAsyncEventArgs accpArgs)
     {
-        accpArgs.AcceptSocket = null;
-
-        try
+        while (true)
         {
-            bool pending = _listener.AcceptAsync(accpArgs);
+            accpArgs.AcceptSocket = null;
+        
+            try
+            {
+                bool pending = _listener.AcceptAsync(accpArgs);
 
-            if (pending == false)
+                if (pending == true)
+                    return;
+
                 OnAccpComplete(null, accpArgs);
+            }
+            catch(ObjectDisposedException e)
+            {
+                Console.WriteLine("Server Closed");
+                Console.WriteLine(e);
+                Environment.Exit(0);
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine($"[FATAL] Listener Socket Broken: {e}");
+                Environment.Exit(0);
+            }
         }
-        catch(Exception e)
-        {
-            Console.WriteLine("RegisterAccp Failed");
-            Console.WriteLine(e);
-            return;
-        }
-
-        _argsCount++;
     }
 
     void OnAccpComplete(object? sender, SocketAsyncEventArgs accpArgs)
     {
-        _argsCount--;
-        if(accpArgs.SocketError != SocketError.Success)
-        {
-            RegisterAccp(accpArgs);
-            return;
-        }
+        if(accpArgs.SocketError == SocketError.Success)
+            SessionPool<ServerSession>.Rent()!.Start(accpArgs.AcceptSocket!);
 
-        SessionPool<ServerSession>.Rent()!.Start(accpArgs.AcceptSocket!);
+        if (sender == null)
+            return;
 
         RegisterAccp(accpArgs);
     }
