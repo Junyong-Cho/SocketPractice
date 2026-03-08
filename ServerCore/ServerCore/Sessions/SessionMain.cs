@@ -43,7 +43,7 @@ public abstract partial class Session
         _sendArgs.Completed += OnSendComplete;
     }
 
-    public void Start(Socket socket)
+    public virtual void Start(Socket socket)
     {
         _socket = socket;
 
@@ -63,14 +63,14 @@ public abstract partial class Session
             _socket.Close();
         }
         catch { }
-
-        _socket = null;
+        
         Release();
     }
 
-    protected virtual void LogExceptionAndDisconnectAndRelease(object log)
+    protected virtual void LogExceptionAndDisconnectAndRelease(object? log)
     {
-        Console.WriteLine(log);
+        if (_disconnected == 0 && log !=null)
+            Console.WriteLine(log);
         Disconnect();
         Release();
     }
@@ -78,9 +78,11 @@ public abstract partial class Session
     protected virtual void Release()
     {
         if (Interlocked.Decrement(ref _refCount) == 0)
+        {
             OnDisconnect();
+            _socket = null;
+        }
     }
-
     public virtual void Reset()
     {
         _disconnected = 0;

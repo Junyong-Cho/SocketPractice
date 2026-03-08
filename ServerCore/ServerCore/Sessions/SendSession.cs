@@ -91,7 +91,7 @@ partial class Session
 
         if (byteTransferred <= 0)
         {
-            LogExceptionAndDisconnectAndRelease($"Zero Byte Sended");
+            LogExceptionAndDisconnectAndRelease(null);
             return;
         }
 

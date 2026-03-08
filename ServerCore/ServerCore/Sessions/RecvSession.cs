@@ -52,7 +52,7 @@ partial class Session
 
         if (byteTransferred <= 0)
         {
-            LogExceptionAndDisconnectAndRelease("ZeroByte Transferred");
+            LogExceptionAndDisconnectAndRelease(null);
             return;
         }
 
