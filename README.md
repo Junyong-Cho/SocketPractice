@@ -1,5 +1,5 @@
 # ServerCore
-네트워크 엔진 라이브러리
+Socket Async Event Args (SAEA) 방식의 네트워크 엔진 라이브러리
 
 # 아키텍처 구조
 
@@ -19,7 +19,7 @@
   - WriteSegment 사이즈
 - bool OnRecv(int readSize)
   - ReadSegment에서 처리한 바이트만큼 ReadPos 포인터 이동 (DataSize보다 크면 false)
-- bool OnSend(int writeSize)
+- bool OnWrite(int writeSize)
   - WriteSegment에서 처리한 바이트만큼 WritePos 포인터 이동 (FreeSize보다 크면 false)
 - void Clean()
   - 포인터가 어느 정도 차면 ReadSegment를 배열의 맨 앞으로 복사 후 포인터 조정
@@ -59,19 +59,27 @@
 ### Session.cs
 - 추상 클래스
 - abstract void OnConnect()
-  - 세션 활성화시 호출되어 세션 Reset 등 초기화 구현
+  - 세션 활성화시 호출되어 세션 초반 로직 구현
 - abstract void OnDisconnect()
-  - 세션 종료시 호출되어 세션 풀 반납 등 구현
+  - 세션 종료시 호출되어 마무리 및 세션 풀 반납 등 구현
 - abstract int OnRecv(ArraySegment<byte> segment)
   - Recieve 이벤트 발생시 전송받은 패킷을 처리하고 처리한 사이즈 반환 (이후 RecvBuffer의 OnRead 호출)
-- abstract int OnSend(int numOfBytes)
-  - 추후 SendBuffer의 refCount 구현을 위한 메서드 ~(미구현)~
+- ~bstract int OnSend(int numOfBytes) (미구현)~
+  - 추후 SendBuffer의 refCount 구현을 위한 메서드
 - RegisterSend()
-  - 소켓에서 데이터를 수신할 때 이벤트를 발생하도록 등록
-  - 
+  - 소켓에서 데이터를 수신할 때 이벤트를 발생하도록 등록 
 - 가독성과 유지보수를 위해 SendSession.cs, RecvSession.cs, SessionMain.cs로 나누어짐
 - SocketAsyncEventArgs로 비동기 힙 할당을 최소화하는 고성능 모델
 - _sendingList와 _pendingList 두 개의 리스트 참조를 스왑하며 lock 시간 단축
+
+### 세션 전송 플로우
+
+- 수신 흐름
+<img width="1674" height="942" alt="Image" src="https://github.com/user-attachments/assets/b69d16ad-f28d-4600-ab2a-fa48a12c621b" />
+<br></br>
+
+- 전송 흐름
+<img width="1648" height="937" alt="Image" src="https://github.com/user-attachments/assets/1224dbeb-8071-4bd7-ab0d-adee059a0176" />
 
 ### SessionPool.cs
 - 연결 종료된 세션을 재사용하기 위한 풀링 클래스
