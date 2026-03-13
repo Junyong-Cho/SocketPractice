@@ -6,7 +6,7 @@
 ## Buffers
 
 ### RecvBuffer.cs
-<img width="1628" height="421" alt="image" src="https://github.com/user-attachments/assets/f6c15a3b-b58f-42ec-98e3-4bd0fe2302e4" />
+<img width="1608" height="409" alt="Image" src="https://github.com/user-attachments/assets/a3a012b9-bc58-4729-87ce-bda051c42893" />
 
 - 패킷 수신 버퍼
 - ArraySegment<byte> ReadSegment
@@ -27,7 +27,7 @@
   - 버퍼 리셋, 각 포인터 0으로 초기화
   
 ### SendBuffer.cs
-<img width="1631" height="384" alt="image" src="https://github.com/user-attachments/assets/e27a1d6c-eaa1-429b-8b28-8f1071faaff0" />
+<img width="1614" height="382" alt="Image" src="https://github.com/user-attachments/assets/141931f7-c442-45b9-a3e7-a2326c31edf3" />
 
 - 패킷 전송 버퍼
 - int FreeSize : 버퍼의 남은 사이즈
@@ -41,7 +41,7 @@
 **추후 ArrayPool과 reference count로 힙 할당 최소화 예정**
 
 ### SendBufferHandler.cs
-<img width="1602" height="392" alt="image" src="https://github.com/user-attachments/assets/5aacdc1c-eca4-46ac-859a-79140e96e781" />
+<img width="1602" height="383" alt="Image" src="https://github.com/user-attachments/assets/660bd5ce-6cd3-4e2e-a29e-834826b3f3b3" />
 
 - SendBuffer를 다루는 정적 클래스
 - ThreadLocal<SendBuffer>
