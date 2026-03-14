@@ -41,10 +41,17 @@ public class RecvBuffer
     {
         int dataSize = DataSize;
 
-        Buffer.BlockCopy(_buffer, _readPos, _buffer, 0, dataSize);
+        if (dataSize == 0)
+        {
+            _readPos = _writePos = 0;
+        }
+        else
+        {
+            _buffer.AsSpan(_readPos, dataSize).CopyTo(_buffer.AsSpan());
 
-        _readPos = 0;
-        _writePos = dataSize;
+            _readPos = 0;
+            _writePos = dataSize;
+        }
     }
 
     public void Reset()
